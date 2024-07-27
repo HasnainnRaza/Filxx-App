@@ -5,6 +5,10 @@ const global = {
       type: '',
       page: 1,
       totalPages: 1
+    },
+    api: {
+      apiKey: '13d6adc57062113d043ef167e7989391',
+      apiUrl: 'https://api.themoviedb.org/3/'
     }
   };
 
@@ -233,9 +237,10 @@ async function search() {
   global.search.term = urlParams.get('search-term');
 
   if (global.search.term !== '' && global.search.term !== null) {
-    // @todo - make request and display results
+    const results = await searchAPIData();
+    console.log(results);
   } else {
-
+      showAlert('please enter a search term');
   }
 }
 
@@ -290,8 +295,8 @@ async function search() {
 
 // Fetch data from TMBD API 
 async function fetchAPIData(endpoint) {
-    const API_KEY = '13d6adc57062113d043ef167e7989391';
-    const API_URL = 'https://api.themoviedb.org/3/';
+    const API_KEY = global.api.apiKey;
+    const API_URL = global.api.apiUrl;
     
     showSpinner();
     
@@ -312,6 +317,23 @@ function hideSpinner() {
     document.querySelector('.spinner').classList.remove('show');
 }
 
+// Make Request To Search 
+async function searchAPIData() {
+  const API_KEY = global.api.apiKey;
+  const API_URL = global.api.apiUrl;
+  
+  showSpinner();
+  
+  const response = await fetch(
+      `${API_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}`);
+
+  const data = await response.json();
+
+  hideSpinner();
+
+  return data;
+}
+
 // Highlight active link 
 function highLightActiveLink() {
     const links = document.querySelectorAll('.nav-link');
@@ -322,7 +344,15 @@ function highLightActiveLink() {
     });
 }
 
+// Show Error Alert
+function showAlert(message, className) {
+ const alertEl = document.createElement('div');
+ alertEl.classList.add('alert', className);
+ alertEl.appendChild(document.createTextNode(message));
+ document.querySelector('#alert').appendChild(alertEl);
 
+ setTimeout(() => alertEl.remove(), 3000);
+}
 
 function addCommasToNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

@@ -1,6 +1,12 @@
 const global = {
     currentPage: window.location.pathname,
-};
+    search: {
+      term: '',
+      type: '',
+      page: 1,
+      totalPages: 1
+    }
+  };
 
 // Display Popular Movies
 
@@ -140,7 +146,6 @@ async function displayMovieDetails() {
   // Display Show Details 
 async function displayShowDetails() {
   const showId = window.location.search.split('=')[1];
-  console.log(showId);
 
    const show = await fetchAPIData(`tv/${showId}`);
 
@@ -178,7 +183,7 @@ async function displayShowDetails() {
            <ul class="list-group">
              ${show.genres.map((genre) => `<li>${genre.name} </li>`).join('')}
            </ul>
-           <a href="${show.homepage}" target="_blank" class="btn">Visit Movie Homepage</a>
+           <a href="${show.homepage}" target="_blank" class="btn">Visit Tv-Show Homepage</a>
          </div>
        </div>
        <div class="details-bottom">
@@ -186,7 +191,7 @@ async function displayShowDetails() {
          <ul>
            <li><span class="text-secondary">Number Of Episodes :</span> ${show.number_of_episodes}
              </li>
-           <li><span class="text-secondary">Last Episode To Air:</span> ${show.last_episode_to_air} </li>
+           <li><span class="text-secondary">Last Episode To Air:</span> ${show.last_episode_to_air}</li>
            <li><span class="text-secondary">Status:</span> ${show.status}</li>
          </ul>
          <h4>Production Companies</h4>
@@ -218,6 +223,71 @@ async function displayShowDetails() {
         document.querySelector('#show-details').appendChild(overlayDiv);
       }
   }
+
+  // Search Movies/Shows
+async function search() {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+
+  global.search.type = urlParams.get('type');
+  global.search.term = urlParams.get('search-term');
+
+  if (global.search.term !== '' && global.search.term !== null) {
+    // @todo - make request and display results
+  } else {
+
+  }
+}
+
+  
+  // Display Slider Movies 
+  async function displaySlider() {
+    const { results } = await fetchAPIData('movie/now_playing');
+    const swiperWrapper = document.querySelector('.swiper-wrapper');
+    
+    results.forEach((movie) => {
+      const div = document.createElement('div');
+      div.classList.add('swiper-slide');
+      
+      div.innerHTML = `
+      <a href="movie-details.html?id=${movie.id}">
+      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
+      </a>
+      <h4 class="swiper-rating">
+      <i class="fas fa-star text-secondary"></i> ${movie.vote_average} / 10
+      </h4>
+      `
+      swiperWrapper.appendChild(div);
+    });
+    initSwiper();
+  }
+  
+  function initSwiper() {
+    const swiper = new Swiper('.swiper', {
+      slidesPerView: 1,
+      spaceBetween: 30,
+      freeMode: true,
+      loop: true,
+      autoplay: {
+        delay: 4000,
+        disableOnInteraction: false 
+      },
+      breakpoints: {
+        500: {
+          slidesPerView: 2
+        },
+        700: {
+          slidesPerView: 3
+        },
+        1200: {
+          slidesPerView: 4
+        },
+      }
+    });
+  }
+
+
+
 // Fetch data from TMBD API 
 async function fetchAPIData(endpoint) {
     const API_KEY = '13d6adc57062113d043ef167e7989391';
@@ -252,6 +322,8 @@ function highLightActiveLink() {
     });
 }
 
+
+
 function addCommasToNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -259,7 +331,8 @@ function addCommasToNumber(number) {
 // Init App 
 function init() {
     if (global.currentPage === '/' || global.currentPage === '/index.html') {
-        displayPopularMovies();
+      displaySlider();  
+      displayPopularMovies();
     } else if (global.currentPage === '/shows.html') {
         displayPopularShows();
     } else if (global.currentPage === '/movie-details.html') {
@@ -267,7 +340,7 @@ function init() {
     } else if (global.currentPage === '/tv-details.html') {
         displayShowDetails();
     } else if (global.currentPage === '/search.html') {
-        console.log('Search Page');
+        search();
     }
     highLightActiveLink();
 }

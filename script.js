@@ -310,7 +310,17 @@ function displayPagination() {
 
   document.querySelector('#pagination').appendChild(div);
 
-  
+  // Disable prev button if on first page
+  if (global.search.page === 1) {
+    document.querySelector('#prev').disabled = true;
+  }
+
+  // Disable next button if on last page
+  if (global.search.page === global.search.totalPages) {
+    document.querySelector('#next').disabled = true;
+  }
+
+  // 
 }
   
   // Display Slider Movies 

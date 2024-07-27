@@ -254,7 +254,7 @@ async function search() {
     document.querySelector('#search-term').value = '';
 
   } else {
-      showAlert('please enter a search term');
+      showAlert('Please Enter A Search Term');
   }
 }
 
